@@ -15,7 +15,7 @@
 Valem para toda tarefa, sem repetição nos requisitos de cada uma.
 
 - **Java 21**; Spring Boot **3.5.x** (fixar a estável do `start.spring.io` na Tarefa 7).
-- **Superfície HTTP congelada em 19 rotas** (spec 9.4) + `/actuator/health`. Rota nova é violação de R8 e precisa de aprovação.
+- **Superfície HTTP congelada em 17 endpoints** (spec 9.4) + `/actuator/health`. Rota nova é violação de R8 e precisa de aprovação.
 - **PK por `SEQUENCE` + trigger `BEFORE INSERT`**, nunca `GENERATED AS IDENTITY`.
 - **Nada de sintaxe exclusiva do 23ai:** sem `DROP ... IF EXISTS`, sem `BOOLEAN` em coluna, `FROM dual` sempre explícito.
 - **Nada que exija DBA:** sem `CREATE USER`, `TABLESPACE`, `GRANT`. O usuário da aplicação é criado pela imagem Docker, não pelos nossos scripts.
@@ -871,7 +871,7 @@ DER físico em Mermaid `erDiagram` (renderiza no GitHub sem imagem anexa), MER c
 
 - [ ] **Step 2: Escrever `README.md`**
 
-Seções: o problema e o público; **ODS 11** (alvo 11.5) e ODS 13 com a ligação explicada; as 3 funcionalidades; arquitetura em camadas e onde cada regra mora (spec 9.3); como rodar (banco → API → app, com o aviso de que o primeiro boot do Oracle leva minutos); tabela das 19 rotas; **gerenciamento de memória e eficiência** (spec 9.5, lado API, mais a seção já escrita do app); justificativa das tecnologias; link para o repositório do front e para a branch da integração; limites conhecidos — `foto_uri`, a tela de Detalhe dependendo das 200 mais recentes (spec 13.5), e R2 garantida por construção e não verificada.
+Seções: o problema e o público; **ODS 11** (alvo 11.5) e ODS 13 com a ligação explicada; as 3 funcionalidades; arquitetura em camadas e onde cada regra mora (spec 9.3); como rodar (banco → API → app, com o aviso de que o primeiro boot do Oracle leva minutos); tabela das 17 endpoints; **gerenciamento de memória e eficiência** (spec 9.5, lado API, mais a seção já escrita do app); justificativa das tecnologias; link para o repositório do front e para a branch da integração; limites conhecidos — `foto_uri`, a tela de Detalhe dependendo das 200 mais recentes (spec 13.5), e R2 garantida por construção e não verificada.
 
 - [ ] **Step 3: Gerar `README.txt` e `links.txt`**
 

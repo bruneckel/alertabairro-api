@@ -88,7 +88,7 @@ Coisas que, se acontecerem, tornam a entrega um fracasso mesmo funcionando:
 | R5 | Mínimo 3 funcionalidades, login/cadastro não contam | enunciado | Mapa+ocorrências, abrigos+SOS, rede de ajuda+check-in. |
 | R6 | Prazo: 19/11/2026, sem entrega atrasada | enunciado | Ver seção 10 (ordem e linha de corte). |
 | R7 | Versão do Oracle da FIAP desconhecida | — | Escrevo para o menor denominador comum. Ver 6.1. |
-| R8 | **Paridade** com as rotas e o app existentes | decisão do usuário | As 19 rotas do v2 são o piso e o teto da superfície HTTP. Nada de rota nova sem aprovação — ver 13.6. |
+| R8 | **Paridade** com as rotas e o app existentes | decisão do usuário | As 17 endpoints do v2 são o piso e o teto da superfície HTTP. Nada de rota nova sem aprovação — ver 13.6. |
 | R9 | `README.txt` é o nome que o enunciado pede | enunciado | Entrego `README.md` (renderiza no GitHub) **e** `README.txt` com o mesmo conteúdo em texto puro. |
 
 ---
@@ -127,11 +127,11 @@ Estado: **v1**. Faz 9 chamadas HTTP, tem `USE_MOCK = true` e `BASE_URL` fixo em
 ### 5.2 O back-end anterior (`backend-antigo/`)
 
 Node.js 20 + Express 5 + `node-oracledb`, 4 arquivos de código (507 linhas) e 4 de teste
-(526 linhas). Documenta uma superfície **v2** de 19 rotas.
+(526 linhas). Documenta uma superfície **v2** de 17 endpoints.
 
 **O que ele acertou e vai ser preservado:**
 
-- As 19 rotas e seus códigos HTTP (400/401/403/404/409/422/500).
+- As 17 endpoints e seus códigos HTTP (400/401/403/404/409/422/500).
 - Privacidade de quem pede ajuda: a API nunca devolve lat/lng do solicitante, só a
   distância em texto (`"300 m"`, `"1,2 km"`).
 - Flag `meu` em vez de expor `idUsuario` ao cliente.
@@ -152,7 +152,7 @@ substitua `<nome_da_constraint>` à mão. **A parte que o enunciado mais cobra n
 
 **(b) As duas metades não se encaixam.**
 O README do back manda rodar o app com `EXPO_PUBLIC_API_URL`; o front recebido não lê essa
-variável. Front v1 (9 chamadas) contra back v2 (19 rotas).
+variável. Front v1 (9 chamadas) contra back v2 (17 endpoints).
 
 **(c) Conflito de domínio que quebra em runtime.**
 `resolverPedido` grava `status = 'resolvido'`, mas o tipo `StatusPedido` do front só
@@ -430,7 +430,7 @@ conhece regra de negócio. Isso é o oposto do `app.js` de 271 linhas descrito e
 | **BCryptPasswordEncoder** (custo 10) | mesmo | Compatível com os hashes bcrypt do back antigo. |
 | **Bean Validation** nos DTOs | validação manual | Substitui as ~15 chamadas de `exigir()`. A regra fica junto do campo, declarativa. |
 | **Flyway** | script solto na pasta | O `ajustes_api_v2.sql` com `<nome_da_constraint>` para editar à mão é exatamente o problema que migração versionada resolve. Exige `flyway-database-oracle`. Os arquivos continuam SQL puro (6.1). |
-| **springdoc-openapi** | nenhuma | Swagger UI dá uma lista clicável de 19 rotas: é o que faz as rotas que o app não usa aparecerem no vídeo de 5 minutos. |
+| **springdoc-openapi** | nenhuma | Swagger UI dá uma lista clicável de 17 endpoints: é o que faz as rotas que o app não usa aparecerem no vídeo de 5 minutos. |
 | **Testcontainers** (`gvenzl/oracle-free:23-slim`) | mock em memória | Fecha o buraco 5.3(f): o teste roda o Flyway de verdade e exercita as rotinas PL/SQL de verdade. É o diferencial mais forte da entrega. |
 | **Actuator** | `/health` escrito à mão | `/actuator/health` já traz o estado do pool e do banco. |
 
@@ -454,7 +454,7 @@ A tabela abaixo é a resposta à pergunta que o vídeo técnico precisa responde
 
 ### 9.4 Superfície HTTP
 
-As 19 rotas do v2, preservadas. 🔒 = exige JWT; 🦺 = só perfil `voluntario`.
+As 17 endpoints do v2, preservadas. 🔒 = exige JWT; 🦺 = só perfil `voluntario`.
 
 | Método | Rota | Usada pelo app |
 |---|---|---|
@@ -561,7 +561,7 @@ Ordem de execução, com linha de corte pensada no prazo de dois dias:
 
 1. **Banco** — DDL portável + 6 rotinas PL/SQL + carga inicial de abrigos + script de teste.
 2. **Docker** — Compose com Oracle e healthcheck, validado subindo de zero.
-3. **API** — camadas, segurança, as 19 rotas, tratamento de erro.
+3. **API** — camadas, segurança, as 17 endpoints, tratamento de erro.
 4. **Integração** — branch `feat/integracao-api-real` no repositório do front com o
    `api.ts` reescrito nas duas cópias; app rodando contra a API real.
 5. **DER/MER + README** — documentação completa.
