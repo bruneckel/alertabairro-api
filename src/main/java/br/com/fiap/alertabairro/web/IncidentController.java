@@ -3,6 +3,7 @@ package br.com.fiap.alertabairro.web;
 import br.com.fiap.alertabairro.security.AuthenticatedUser;
 import br.com.fiap.alertabairro.service.IncidentService;
 import br.com.fiap.alertabairro.web.dto.IncidentResponse;
+import br.com.fiap.alertabairro.web.dto.IncidentActionRequest;
 import br.com.fiap.alertabairro.web.dto.NewIncidentRequest;
 import br.com.fiap.alertabairro.web.dto.Pagination;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,8 @@ import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,5 +48,17 @@ public class IncidentController {
   public IncidentResponse register(
       @Valid @RequestBody NewIncidentRequest request, AuthenticatedUser current) {
     return incidents.register(current.id(), request);
+  }
+
+  @PatchMapping("/{id}")
+  @Operation(summary = "Confirma a ocorrencia (\"tambem vejo isso aqui\")")
+  public IncidentResponse apply(
+      @PathVariable long id,
+      @Valid @RequestBody IncidentActionRequest request,
+      AuthenticatedUser current) {
+    return switch (request.action()) {
+      case "confirmar" -> incidents.confirm(id, current);
+      default -> throw new IllegalArgumentException("acao deve ser: confirmar");
+    };
   }
 }
