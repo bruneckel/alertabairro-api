@@ -7,16 +7,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Documentacao navegavel em /swagger-ui.html.
- *
- * <p>Sete das dezenove rotas nao sao usadas pelo app (acoes de voluntario, exclusao,
- * indicadores). O Swagger UI e o que as torna demonstraveis no video tecnico sem
- * depender de Postman.
+ * Swagger UI at /swagger-ui.html. Seven of the nineteen routes are not reachable from the
+ * app, and this is what makes them demonstrable without Postman.
  */
 @Configuration
 public class OpenApiConfig {
 
-  static final String ESQUEMA_JWT = "bearerAuth";
+  static final String JWT_SCHEME = "bearerAuth";
 
   @Bean
   OpenAPI openApi() {
@@ -27,10 +24,10 @@ public class OpenApiConfig {
             .description("""
                 Rede comunitaria de alerta e ajuda para eventos climaticos extremos.
 
-                As rotas protegidas exigem o cabecalho Authorization: Bearer <token>,
-                obtido em POST /auth/login ou POST /auth/cadastro.
+                As rotas protegidas exigem Authorization: Bearer <token>, obtido em
+                POST /auth/login ou POST /auth/cadastro.
                 """))
-        .schemaRequirement(ESQUEMA_JWT, new SecurityScheme()
+        .schemaRequirement(JWT_SCHEME, new SecurityScheme()
             .type(SecurityScheme.Type.HTTP)
             .scheme("bearer")
             .bearerFormat("JWT"));

@@ -1,9 +1,9 @@
 package br.com.fiap.alertabairro.web;
 
-import br.com.fiap.alertabairro.service.UsuarioService;
-import br.com.fiap.alertabairro.web.dto.CadastroRequest;
+import br.com.fiap.alertabairro.service.UserService;
 import br.com.fiap.alertabairro.web.dto.LoginRequest;
-import br.com.fiap.alertabairro.web.dto.SessaoResponse;
+import br.com.fiap.alertabairro.web.dto.SessionResponse;
+import br.com.fiap.alertabairro.web.dto.SignUpRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -14,28 +14,28 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Entrada no aplicativo. Nao conta como funcionalidade para a Global Solution. */
+/** Entry into the app. Does not count as a feature for the Global Solution. */
 @RestController
 @RequestMapping("/auth")
-@Tag(name = "Autenticacao", description = "Cadastro e login. Devolvem o token usado nas demais rotas.")
+@Tag(name = "Autenticacao", description = "Cadastro e login. Devolvem o token das demais rotas.")
 public class AuthController {
 
-  private final UsuarioService usuarios;
+  private final UserService users;
 
-  public AuthController(UsuarioService usuarios) {
-    this.usuarios = usuarios;
+  public AuthController(UserService users) {
+    this.users = users;
   }
 
   @PostMapping("/cadastro")
   @ResponseStatus(HttpStatus.CREATED)
-  @Operation(summary = "Cria a conta e ja devolve a sessao")
-  public SessaoResponse cadastrar(@Valid @RequestBody CadastroRequest pedido) {
-    return usuarios.cadastrar(pedido);
+  @Operation(summary = "Cria a conta e devolve a sessao")
+  public SessionResponse signUp(@Valid @RequestBody SignUpRequest request) {
+    return users.signUp(request);
   }
 
   @PostMapping("/login")
   @Operation(summary = "Autentica e devolve o token")
-  public SessaoResponse entrar(@Valid @RequestBody LoginRequest pedido) {
-    return usuarios.autenticar(pedido);
+  public SessionResponse login(@Valid @RequestBody LoginRequest request) {
+    return users.authenticate(request);
   }
 }
