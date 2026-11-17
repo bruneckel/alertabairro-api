@@ -6,6 +6,8 @@
 #   docker compose up -d oracle
 #   docker compose ps          # aguardar "healthy"
 
+name: alertabairro
+
 services:
   oracle:
     # 23ai Free. Imagem com ARM64 nativo: as imagens oracle-xe:21 sao so amd64
@@ -23,8 +25,8 @@ services:
       - "1521:1521"
     volumes:
       - oracle-dados:/opt/oracle/oradata
-      - ./banco:/banco:ro
-      - ./banco/teste:/teste:ro
+      - ./database:/database:ro
+      - ./database/tests:/tests:ro
     healthcheck:
       # healthcheck.sh vem na propria imagem gvenzl.
       test: ["CMD", "healthcheck.sh"]

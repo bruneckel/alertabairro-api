@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Executa os scripts de teste SQL dentro do container Oracle.
 #
-#   ./banco/teste/rodar_testes.sh                  roda todos os t*.sql em ordem
-#   ./banco/teste/rodar_testes.sh t2_ocorrencia.sql roda apenas o indicado
+#   ./database/tests/run_tests.sh                  roda todos os t*.sql em ordem
+#   ./database/tests/run_tests.sh t2_occurrence.sql roda apenas o indicado
 #
 # Cada script de teste usa WHENEVER SQLERROR EXIT FAILURE, entao qualquer
 # RAISE_APPLICATION_ERROR faz o sqlplus sair com codigo != 0. Este runner
@@ -23,11 +23,11 @@ if [ "$#" -gt 0 ]; then
   ARQUIVOS=("$@")
 else
   ARQUIVOS=()
-  for f in banco/teste/t*.sql; do ARQUIVOS+=("$(basename "$f")"); done
+  for f in database/tests/t*.sql; do ARQUIVOS+=("$(basename "$f")"); done
 fi
 
 if [ "${#ARQUIVOS[@]}" -eq 0 ]; then
-  echo "Nenhum script de teste encontrado em banco/teste/"
+  echo "Nenhum script de teste encontrado em database/tests/"
   exit 1
 fi
 
@@ -35,7 +35,7 @@ primeiro_erro=0
 for arquivo in "${ARQUIVOS[@]}"; do
   arquivo="$(basename "$arquivo")"
   printf '\n=== %s ===\n' "$arquivo"
-  if docker compose exec -T oracle sqlplus -S -L "${USUARIO}/${SENHA}@//localhost:1521/${SERVICO}" "@/teste/${arquivo}"; then
+  if docker compose exec -T oracle sqlplus -S -L "${USUARIO}/${SENHA}@//localhost:1521/${SERVICO}" "@/tests/${arquivo}"; then
     echo "-- passou: ${arquivo}"
   else
     codigo=$?

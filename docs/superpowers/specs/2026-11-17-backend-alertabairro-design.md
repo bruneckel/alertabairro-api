@@ -144,7 +144,7 @@ Node.js 20 + Express 5 + `node-oracledb`, 4 arquivos de código (507 linhas) e 4
 
 Isto é o diagnóstico que justifica recomeçar em vez de portar.
 
-**(a) A pasta `banco/` está vazia na prática — 25 linhas.**
+**(a) A pasta `database/` está vazia na prática — 25 linhas.**
 Não existe DDL, nenhuma das 5 rotinas PL/SQL, nem DER, nem MER. O `README_BANCO.txt`
 ainda contém o texto `[PESSOA 3/4: substituam este texto pelo README do banco]`. O único
 arquivo SQL, `ajustes_api_v2.sql`, se declara "NAO testado em Oracle" e exige que alguém
@@ -522,16 +522,20 @@ outro, para que o avaliador que abrir qualquer um dos dois ache o conjunto compl
 ### 10.1 Repositório novo (back-end)
 
 ```
-alertabairro/
-├── api/                  Spring Boot (Maven), Dockerfile multi-stage
-├── banco/                migrações SQL puras: DDL, rotinas PL/SQL, carga, testes
+alertabairro-api/
+├── pom.xml · Dockerfile · src/   Spring Boot (Maven) na raiz: o repositório É a API
+├── database/                     migrações SQL puras: DDL, rotinas PL/SQL, carga, testes
 ├── docs/
-│   ├── modelo-dados.md   DER + MER + dicionário de dados
-│   └── superpowers/      este documento
-├── docker-compose.yml    Oracle 23ai Free + API
-├── README.md             execução, justificativas, memória, ODS, link do front
-└── links.txt             GitHub + vídeos (você preenche)
+│   ├── modelo-dados.md           DER + MER + dicionário de dados
+│   └── superpowers/              este documento
+├── docker-compose.yml            Oracle 23ai Free + API
+├── README.md · README.txt        execução, justificativas, memória, ODS, link do front
+└── links.txt                     GitHub + vídeos (você preenche)
 ```
+
+Nome do repositório e pastas em inglês, por convenção de mercado. Os nomes de **domínio**
+(tabelas, rotinas PL/SQL e rotas) seguem em português: são contrato fechado com o app e
+com a API anterior, e traduzi-los quebraria a paridade exigida em R8.
 
 Como o enunciado pede **um** GitHub com "código-fonte, README e modelo de dados", o
 `README.md` deste repositório abre apontando para o repositório do app e para a branch da
@@ -630,7 +634,7 @@ um dos nomes de tabela mais colidíveis que existem, e um script de reset rodado
 errado apaga trabalho de outra matéria.
 
 **A decisão:** as migrações versionadas são **create-only**. Todo `DROP` fica isolado em
-`banco/reset_ambiente.sql`, fora da sequência de migração, com um aviso no topo do arquivo
+`database/reset_environment.sql`, fora da sequência de migração, com um aviso no topo do arquivo
 e no README de que ele é para o Docker local. Nenhum caminho automático executa esse
 arquivo.
 
@@ -641,7 +645,7 @@ Num `docker compose up` limpo o Mapa nasce vazio e a aba Ajuda também. Pior: de
 ninguém confirma a própria ocorrência — registra com A, confirma com B, confirma com C, e
 só então a prioridade sobe.
 
-**A decisão:** `banco/seed_demo.sql`, opt-in, **fora** das migrações versionadas (pelo
+**A decisão:** `database/seed_demo.sql`, opt-in, **fora** das migrações versionadas (pelo
 mesmo motivo de 13.2 — não pode cair no schema da FIAP). Contém três usuários de
 demonstração com hash bcrypt de senha conhecida, algumas ocorrências em estágios
 diferentes, pedidos e ofertas, e check-ins. O README traz a receita de três contas como
