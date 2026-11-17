@@ -14,6 +14,22 @@ public class CheckinRepository {
     this.jdbc = jdbc;
   }
 
+  /** Registers the check-in and returns the generated id. */
+  public long register(long userId, String status, Double latitude, Double longitude) {
+    long id = jdbc.sql("SELECT seq_checkin.NEXTVAL FROM dual").query(Long.class).single();
+    jdbc.sql("""
+            INSERT INTO checkin (id, id_usuario, status, latitude, longitude)
+                 VALUES (:id, :user, :status, :lat, :lng)
+            """)
+        .param("id", id)
+        .param("user", userId)
+        .param("status", status)
+        .param("lat", latitude)
+        .param("lng", longitude)
+        .update();
+    return id;
+  }
+
   /**
    * Last known position of a user, used as the fallback for the distance shown in the help
    * tab when the app sends no coordinate. ROWNUM instead of FETCH FIRST, for portability.
