@@ -304,7 +304,7 @@ git commit -m "feat(banco): fn_abrigo_mais_proximo (Haversine) e prc_controle_va
 - Produces:
   - `prc_encerrar_pedidos_antigos(p_dias IN NUMBER, p_qtd_encerrados OUT NUMBER)`
   - `fn_ocupacao_abrigos RETURN NUMBER` — percentual com uma casa, 0 quando a capacidade total é 0
-  - view `vw_indicadores` — uma linha com as 11 colunas da spec 9.4/5.2
+  - view `vw_indicadores` — uma linha com as 12 colunas da spec 9.4/5.2 (o README antigo listava 11 por omitir `pedidosResolvidos`; o `repositorio.js` devolvia 12)
 
 - [ ] **Step 1: Write the failing test**
 
@@ -324,7 +324,7 @@ Expected: FAIL — identificadores não declarados
 
 `prc_encerrar_pedidos_antigos`: `UPDATE ... WHERE status='aguardando' AND criado_em < SYSTIMESTAMP - NUMTODSINTERVAL(p_dias,'DAY')`, depois `p_qtd_encerrados := SQL%ROWCOUNT`. Alvo é `atendido`, não `resolvido` (spec 8.2).
 
-`vw_indicadores`: as 11 agregações em um `SELECT ... FROM dual`, nomes de coluna em maiúsculo (o repositório faz o apelido para camelCase). `fn_ocupacao_abrigos` isolada para a view e a API não duplicarem a divisão.
+`vw_indicadores`: as 12 agregações em um `SELECT ... FROM dual`, nomes de coluna em maiúsculo (o repositório faz o apelido para camelCase). `fn_ocupacao_abrigos` isolada para a view e a API não duplicarem a divisão.
 
 - [ ] **Step 4: Run test to verify it passes**
 

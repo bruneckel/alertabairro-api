@@ -2,8 +2,8 @@
 --
 -- Somente leitura: a carga e commitada pelas migracoes, e este teste confere
 -- que ela chegou inteira e utilizavel.
-WHENEVER SQLERROR EXIT FAILURE
-WHENEVER OSERROR EXIT FAILURE
+WHENEVER SQLERROR EXIT FAILURE ROLLBACK
+WHENEVER OSERROR EXIT FAILURE ROLLBACK
 SET SERVEROUTPUT ON
 DECLARE
   v_total      NUMBER;
@@ -45,4 +45,4 @@ BEGIN
   DBMS_OUTPUT.PUT_LINE('OK t5_seed');
 END;
 /
-EXIT
+EXIT ROLLBACK

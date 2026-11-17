@@ -8,12 +8,12 @@
 
 CREATE TABLE usuario (
   id          NUMBER                              NOT NULL,
-  nome        VARCHAR2(100)                       NOT NULL,
-  email       VARCHAR2(150)                       NOT NULL,
+  nome        VARCHAR2(100 CHAR)                       NOT NULL,
+  email       VARCHAR2(150 CHAR)                       NOT NULL,
   -- bcrypt gera 60 caracteres, e 100 deixa folga para outro algoritmo no futuro.
-  senha_hash  VARCHAR2(100)                       NOT NULL,
-  bairro      VARCHAR2(100)                       NOT NULL,
-  perfil      VARCHAR2(20)                        NOT NULL,
+  senha_hash  VARCHAR2(100 CHAR)                       NOT NULL,
+  bairro      VARCHAR2(100 CHAR)                       NOT NULL,
+  perfil      VARCHAR2(20 CHAR)                        NOT NULL,
   criado_em   TIMESTAMP DEFAULT SYSTIMESTAMP      NOT NULL,
   CONSTRAINT pk_usuario     PRIMARY KEY (id),
   CONSTRAINT uk_usuario_email UNIQUE (email),
@@ -22,14 +22,16 @@ CREATE TABLE usuario (
 
 CREATE TABLE abrigo (
   id             NUMBER                           NOT NULL,
-  nome           VARCHAR2(100)                    NOT NULL,
-  endereco       VARCHAR2(200)                    NOT NULL,
+  nome           VARCHAR2(100 CHAR)                    NOT NULL,
+  endereco       VARCHAR2(200 CHAR)                    NOT NULL,
   latitude       NUMBER(9,6)                      NOT NULL,
   longitude      NUMBER(9,6)                      NOT NULL,
-  capacidade     NUMBER                           NOT NULL,
-  vagas_ocupadas NUMBER DEFAULT 0                 NOT NULL,
+  capacidade     NUMBER(6)                        NOT NULL,
+  vagas_ocupadas NUMBER(6) DEFAULT 0              NOT NULL,
   CONSTRAINT pk_abrigo PRIMARY KEY (id),
   CONSTRAINT ck_abrigo_capacidade CHECK (capacidade > 0),
+  CONSTRAINT ck_abrigo_latitude   CHECK (latitude  BETWEEN -90  AND 90),
+  CONSTRAINT ck_abrigo_longitude  CHECK (longitude BETWEEN -180 AND 180),
   -- Rede de seguranca para escrita que nao passe por prc_controle_vagas.
   -- A procedure valida antes e levanta -20002/-20004, para o app receber 422
   -- com mensagem legivel em vez de 500.
@@ -39,34 +41,36 @@ CREATE TABLE abrigo (
 CREATE TABLE ocorrencia (
   id         NUMBER                               NOT NULL,
   id_usuario NUMBER                               NOT NULL,
-  tipo       VARCHAR2(50)                         NOT NULL,
-  descricao  VARCHAR2(500)                        NOT NULL,
+  tipo       VARCHAR2(50 CHAR)                         NOT NULL,
+  descricao  VARCHAR2(500 CHAR)                        NOT NULL,
   latitude   NUMBER(9,6)                          NOT NULL,
   longitude  NUMBER(9,6)                          NOT NULL,
-  status     VARCHAR2(20)  DEFAULT 'aberta'       NOT NULL,
-  prioridade VARCHAR2(10)  DEFAULT 'normal'       NOT NULL,
-  relatos    NUMBER        DEFAULT 1              NOT NULL,
-  bairro     VARCHAR2(100),
+  status     VARCHAR2(20 CHAR)  DEFAULT 'aberta'       NOT NULL,
+  prioridade VARCHAR2(10 CHAR)  DEFAULT 'normal'       NOT NULL,
+  relatos    NUMBER(6)     DEFAULT 1              NOT NULL,
+  bairro     VARCHAR2(100 CHAR),
   -- Caminho da foto no aparelho. Limite conhecido: a API guarda o texto,
   -- nao recebe o arquivo (spec 7.5).
-  foto_uri   VARCHAR2(500),
+  foto_uri   VARCHAR2(500 CHAR),
   criada_em  TIMESTAMP DEFAULT SYSTIMESTAMP       NOT NULL,
   CONSTRAINT pk_ocorrencia PRIMARY KEY (id),
   CONSTRAINT fk_ocorrencia_usuario FOREIGN KEY (id_usuario) REFERENCES usuario (id),
   -- Minusculo e sem acento: estes valores atravessam ate o switch de cores do app.
   CONSTRAINT ck_ocorrencia_status     CHECK (status IN ('aberta', 'em_atendimento', 'resolvida')),
   CONSTRAINT ck_ocorrencia_prioridade CHECK (prioridade IN ('normal', 'alta', 'critica')),
-  CONSTRAINT ck_ocorrencia_relatos    CHECK (relatos >= 1)
+  CONSTRAINT ck_ocorrencia_relatos    CHECK (relatos >= 1),
+  CONSTRAINT ck_ocorrencia_latitude   CHECK (latitude  BETWEEN -90  AND 90),
+  CONSTRAINT ck_ocorrencia_longitude  CHECK (longitude BETWEEN -180 AND 180)
 );
 
 CREATE TABLE pedido_ajuda (
   id         NUMBER                               NOT NULL,
   id_usuario NUMBER                               NOT NULL,
-  modo       VARCHAR2(10)                         NOT NULL,
-  categoria  VARCHAR2(50)                         NOT NULL,
-  descricao  VARCHAR2(500)                        NOT NULL,
-  urgencia   VARCHAR2(10)                         NOT NULL,
-  status     VARCHAR2(20) DEFAULT 'aguardando'    NOT NULL,
+  modo       VARCHAR2(10 CHAR)                         NOT NULL,
+  categoria  VARCHAR2(50 CHAR)                         NOT NULL,
+  descricao  VARCHAR2(500 CHAR)                        NOT NULL,
+  urgencia   VARCHAR2(10 CHAR)                         NOT NULL,
+  status     VARCHAR2(20 CHAR) DEFAULT 'aguardando'    NOT NULL,
   latitude   NUMBER(9,6),
   longitude  NUMBER(9,6),
   criado_em  TIMESTAMP DEFAULT SYSTIMESTAMP       NOT NULL,
@@ -76,19 +80,24 @@ CREATE TABLE pedido_ajuda (
   CONSTRAINT ck_pedido_urgencia CHECK (urgencia IN ('baixa', 'media', 'alta')),
   -- 'resolvido' e o que alimenta o Historico. O app v1 so conhece dois valores,
   -- entao a normalizacao fica no api.ts (spec 7.3) e o banco guarda a verdade completa.
-  CONSTRAINT ck_pedido_status   CHECK (status IN ('aguardando', 'atendido', 'resolvido'))
+  CONSTRAINT ck_pedido_status   CHECK (status IN ('aguardando', 'atendido', 'resolvido')),
+  -- NULL e permitido: a coordenada do solicitante e opcional.
+  CONSTRAINT ck_pedido_latitude  CHECK (latitude  BETWEEN -90  AND 90),
+  CONSTRAINT ck_pedido_longitude CHECK (longitude BETWEEN -180 AND 180)
 );
 
 CREATE TABLE checkin (
   id         NUMBER                               NOT NULL,
   id_usuario NUMBER                               NOT NULL,
-  status     VARCHAR2(20)                         NOT NULL,
+  status     VARCHAR2(20 CHAR)                         NOT NULL,
   latitude   NUMBER(9,6),
   longitude  NUMBER(9,6),
   criado_em  TIMESTAMP DEFAULT SYSTIMESTAMP       NOT NULL,
   CONSTRAINT pk_checkin PRIMARY KEY (id),
   CONSTRAINT fk_checkin_usuario FOREIGN KEY (id_usuario) REFERENCES usuario (id),
-  CONSTRAINT ck_checkin_status CHECK (status IN ('estou_bem', 'preciso_de_ajuda'))
+  CONSTRAINT ck_checkin_status    CHECK (status IN ('estou_bem', 'preciso_de_ajuda')),
+  CONSTRAINT ck_checkin_latitude  CHECK (latitude  BETWEEN -90  AND 90),
+  CONSTRAINT ck_checkin_longitude CHECK (longitude BETWEEN -180 AND 180)
 );
 
 -- "Tambem vejo isso aqui": uma confirmacao por usuario por ocorrencia.
@@ -102,6 +111,13 @@ CREATE TABLE confirmacao_ocorrencia (
   CONSTRAINT fk_confirmacao_ocorrencia FOREIGN KEY (id_ocorrencia) REFERENCES ocorrencia (id) ON DELETE CASCADE,
   CONSTRAINT fk_confirmacao_usuario    FOREIGN KEY (id_usuario)    REFERENCES usuario (id)
 );
+
+-- Unicidade de e-mail ignorando a caixa. A constraint uk_usuario_email ja
+-- impede o e-mail identico, mas nao impede 'Maria@x' ao lado de 'maria@x':
+-- a pessoa se cadastraria com um, tentaria entrar com o outro e receberia
+-- "credenciais invalidas" sem entender por que. A API tambem normaliza para
+-- minusculo, e este indice e a rede para escrita que nao passe por ela.
+CREATE UNIQUE INDEX uk_usuario_email_lower ON usuario (LOWER(email));
 
 -- Indices de FK: sem eles, um DELETE no pai pega lock de tabela no filho.
 CREATE INDEX ix_ocorrencia_usuario   ON ocorrencia (id_usuario);

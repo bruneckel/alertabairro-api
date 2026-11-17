@@ -3,14 +3,16 @@
 -- O teste NAO assume a tabela abrigo vazia: a primeira coisa que faz e lotar
 -- todos os abrigos pre-existentes, para que a carga inicial da V6 nao
 -- interfira nas asercoes. Tudo volta no ROLLBACK.
-WHENEVER SQLERROR EXIT FAILURE
-WHENEVER OSERROR EXIT FAILURE
+WHENEVER SQLERROR EXIT FAILURE ROLLBACK
+WHENEVER OSERROR EXIT FAILURE ROLLBACK
 SET SERVEROUTPUT ON
 DECLARE
   v_a       NUMBER;   -- pertinho, LOTADO
   v_b       NUMBER;   -- medio, com vaga
   v_c       NUMBER;   -- longe, com vaga
   v_achado  NUMBER;
+  v_leste   NUMBER;
+  v_norte   NUMBER;
   v_ocupadas NUMBER;
   v_codigo  NUMBER;
 
@@ -86,8 +88,36 @@ BEGIN
   SELECT vagas_ocupadas INTO v_ocupadas FROM abrigo WHERE id = v_b;
   afirmar(v_ocupadas = 6, 'tentativa recusada nao pode alterar a ocupacao, veio ' || v_ocupadas);
 
+  -- ------------------------------------------------------------------
+  -- 8. A distancia e geografica, nao aritmetica sobre graus.
+  --
+  -- Os abrigos dos casos anteriores ficam todos na mesma diagonal, entao
+  -- QUALQUER funcao monotona acertaria o vencedor -- inclusive uma que
+  -- esquecesse o peso cos(latitude) na longitude, ou que tratasse graus como
+  -- radianos. Este par separa as duas coisas:
+  --
+  --   leste: 0.011 grau de longitude  -> 1.1213 km (grau de longitude encurta
+  --                                      por cos(23.55 graus) ~ 0.917)
+  --   norte: 0.0105 grau de latitude  -> 1.1675 km
+  --
+  -- Haversine escolhe o do LESTE (1.1213 < 1.1675).
+  -- Euclidiana em graus escolheria o do NORTE (0.0105 < 0.011).
+  -- ------------------------------------------------------------------
+  UPDATE abrigo SET vagas_ocupadas = capacidade;
+
+  INSERT INTO abrigo (nome, endereco, latitude, longitude, capacidade, vagas_ocupadas)
+       VALUES ('T3 Leste', 'Rua Leste, 1', -23.550000, -46.641000, 10, 0) RETURNING id INTO v_leste;
+  INSERT INTO abrigo (nome, endereco, latitude, longitude, capacidade, vagas_ocupadas)
+       VALUES ('T3 Norte', 'Rua Norte, 2', -23.560500, -46.630000, 10, 0) RETURNING id INTO v_norte;
+
+  v_achado := fn_abrigo_mais_proximo(k_lat, k_lng);
+  afirmar(v_achado = v_leste,
+          'a distancia precisa ser geografica: esperava o abrigo a leste (' || v_leste
+          || '), veio ' || NVL(TO_CHAR(v_achado), 'NULL')
+          || '. Vir o do norte (' || v_norte || ') significa que o peso cos(latitude) na longitude se perdeu.');
+
   ROLLBACK;
   DBMS_OUTPUT.PUT_LINE('OK t3_shelter');
 END;
 /
-EXIT
+EXIT ROLLBACK

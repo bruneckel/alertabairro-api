@@ -28,6 +28,14 @@
 -- ninguem confirma duas vezes (Joao ja confirmou).
 -- ============================================================================
 
+-- Uma falha no meio deste arquivo deixaria o banco parcialmente populado e
+-- COMMITADO, com o sqlplus saindo 0: WHENEVER ... EXIT FAILURE tem COMMIT como
+-- padrao. As diretivas abaixo trocam isso por ROLLBACK. Ruling 3 (manter
+-- diretivas do SQL*Plus fora dos arquivos) nao se aplica aqui: este arquivo
+-- nunca passa pelo Flyway, de proposito.
+WHENEVER SQLERROR EXIT FAILURE ROLLBACK
+WHENEVER OSERROR EXIT FAILURE ROLLBACK
+
 INSERT INTO usuario (nome, email, senha_hash, bairro, perfil)
 SELECT 'Maria Souza', 'maria@alertabairro.demo', '$2y$10$56qnoXmAwdP.NGQq4OsQCOaXuo28EdG.394875vKhWQLs7dez2JUa', 'Centro', 'morador' FROM dual
  WHERE NOT EXISTS (SELECT 1 FROM usuario WHERE email = 'maria@alertabairro.demo');

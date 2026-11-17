@@ -121,12 +121,20 @@ denominador comum.
 | `DROP` em bloco com `EXCEPTION` | `DROP ... IF EXISTS` | `IF EXISTS` só existe no 23ai. |
 | `VARCHAR2`/`NUMBER(1)` para flags | `BOOLEAN` em coluna | `BOOLEAN` em coluna só no 23ai. |
 | `SELECT ... FROM dual` explícito | `VALUES` sem `FROM` | Sintaxe sem `FROM` só no 23ai. |
+| `VARCHAR2(n CHAR)` | `VARCHAR2(n)` | `NLS_LENGTH_SEMANTICS` é `BYTE` por padrão: em `AL32UTF8`, `VARCHAR2(500)` comporta 500 **bytes**, ou seja 250 caracteres acentuados. Uma descrição normal em português era recusada com `ORA-12899`. `CHAR` existe desde o 9i. |
 
 **Ressalva honesta:** isso foi garantido por disciplina de escrita e está
 validado contra o Oracle 23ai Free do Docker. Não foi executado contra o Oracle
 da FIAP.
 
 ### Uma armadilha que custou tempo
+
+### Charset do cliente
+
+`apply.sh` e `run_tests.sh` exportam `NLS_LANG=.AL32UTF8`. Sem isso, um cliente
+com charset diferente (Windows em `Cp1252` é comum) grava os literais acentuados
+de `V6` e `seed_demo.sql` deturpados. O `t5_seed.sql` detecta — mas só se alguém
+o rodar.
 
 O SQL\*Plus **encerra o comando ao encontrar `;` dentro de um comentário `--`**.
 Um comentário terminado em ponto e vírgula no meio de um `CREATE TABLE` corta o
@@ -138,7 +146,17 @@ comando ao meio e produz `ORA-00931`. Nenhum comentário destes arquivos contém
 ```bash
 ./database/tests/run_tests.sh                    # todos
 ./database/tests/run_tests.sh t2_occurrence.sql  # um só
+./database/tests/run_tests.sh t6_lock.sh         # o teste de concorrência
 ```
+
+Um script só conta como aprovado quando o `sqlplus` sai com código 0 **e** a
+saída traz a linha `OK <nome>`. A segunda checagem não é redundante: as
+diretivas `WHENEVER` moram dentro do arquivo de teste, então um arquivo
+renomeado ou fora do *mount* faria o `sqlplus` imprimir `SP2-0310` e sair 0 —
+e o runner anunciaria "passou" para um teste que nunca rodou.
+
+Testes de concorrência precisam de duas sessões simultâneas, o que não cabe num
+script SQL. Esses vêm como `.sh` e valem pelo código de saída.
 
 Cada script afirma com `RAISE_APPLICATION_ERROR(-20900, 'FALHA: ...')` e usa
 `WHENEVER SQLERROR EXIT FAILURE`, então o `sqlplus` sai com código diferente de
@@ -152,7 +170,15 @@ zero e o runner propaga a falha.
 | `t3_shelter.sql` | abrigo mais próximo com vaga, `NULL` quando todos lotados, e `-20002`/`-20003`/`-20004` |
 | `t4_help.sql` | encerramento em lote, ocupação sem divisão por zero, e a view |
 | `t5_seed.sql` | a carga chegou inteira, e o acento não virou mojibake |
+| `t6_lock.sh` | duas sessões simultâneas: o `FOR UPDATE` serializa de verdade |
 
-Os testes que escrevem terminam em `ROLLBACK` e não deixam resíduo. `t3` e `t4`
-isolam-se da carga inicial antes de afirmar números, para não quebrarem quando
-`seed_demo.sql` tiver rodado.
+`t3` e `t4` isolam-se da carga inicial antes de afirmar números, para não
+quebrarem depois de `seed_demo.sql` rodar.
+
+**Por que eles não deixam resíduo**, exatamente: cada script termina em
+`ROLLBACK`, mas numa falha essa linha nunca é alcançada. O que protege os dados
+são duas outras coisas — todo o DML vive dentro de **um único bloco anônimo**, e
+uma exceção não tratada desfaz o bloco inteiro como se fosse um comando só; e as
+diretivas são `WHENEVER SQLERROR EXIT FAILURE ROLLBACK`. Sem o `ROLLBACK` na
+diretiva o padrão do SQL\*Plus é **COMMIT**, e qualquer DML emitido fora do bloco
+sobreviveria a uma falha.

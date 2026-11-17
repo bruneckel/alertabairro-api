@@ -3,8 +3,8 @@
 -- Como a view agrega as 4 tabelas, o teste limpa os dados transacionais antes
 -- de asseverar numeros exatos. Assim ele nao depende da carga inicial da V6
 -- nem do seed de demonstracao. Tudo volta no ROLLBACK.
-WHENEVER SQLERROR EXIT FAILURE
-WHENEVER OSERROR EXIT FAILURE
+WHENEVER SQLERROR EXIT FAILURE ROLLBACK
+WHENEVER OSERROR EXIT FAILURE ROLLBACK
 SET SERVEROUTPUT ON
 DECLARE
   v_usuario NUMBER;
@@ -112,4 +112,4 @@ BEGIN
   DBMS_OUTPUT.PUT_LINE('OK t4_help');
 END;
 /
-EXIT
+EXIT ROLLBACK

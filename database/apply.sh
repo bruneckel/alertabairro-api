@@ -19,14 +19,15 @@ RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$RAIZ"
 
 if [ -f .env ]; then set -a; . ./.env; set +a; fi
+export NLS_LANG="${NLS_LANG:-.AL32UTF8}"
 USUARIO="${APP_USER:-alertabairro}"
 SENHA="${APP_USER_PASSWORD:-alertabairro_dev}"
 SERVICO="${ORACLE_SERVICO:-FREEPDB1}"
 
 executar() {
   docker compose exec -T oracle sqlplus -S -L "${USUARIO}/${SENHA}@//localhost:1521/${SERVICO}" <<SQL
-WHENEVER SQLERROR EXIT FAILURE
-WHENEVER OSERROR EXIT FAILURE
+WHENEVER SQLERROR EXIT FAILURE ROLLBACK
+WHENEVER OSERROR EXIT FAILURE ROLLBACK
 SET SERVEROUTPUT ON
 @${1}
 EXIT
