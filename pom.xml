@@ -116,9 +116,30 @@
         Classe *IT precisa de banco e roda em "mvnw verify", pelo failsafe.
         Assim quem nao tem Docker ainda consegue rodar parte da suite.
       -->
+      <!--
+        Segredo de teste para todas as suites. O SecurityConfig se recusa a subir
+        sem um segredo de 32 caracteres (falhar na subida vale mais do que
+        descobrir um segredo fraco em producao), entao qualquer @SpringBootTest
+        precisa de um. Injetar aqui evita repetir @TestPropertySource em cada
+        classe, e deixa claro que este valor existe so para teste.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <alertabairro.jwt.segredo>segredo-de-teste-com-mais-de-trinta-e-dois-caracteres</alertabairro.jwt.segredo>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
+        <configuration>
+          <systemPropertyVariables>
+            <alertabairro.jwt.segredo>segredo-de-teste-com-mais-de-trinta-e-dois-caracteres</alertabairro.jwt.segredo>
+          </systemPropertyVariables>
+        </configuration>
         <executions>
           <execution>
             <goals>
