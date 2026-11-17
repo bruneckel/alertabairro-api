@@ -1,0 +1,11 @@
+.env
+.DS_Store
+
+# workspace de execucao do plano (scratch, reconstruivel)
+.superpowers/
+
+# Java / Maven
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar

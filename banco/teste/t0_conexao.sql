@@ -1,0 +1,13 @@
+-- t0_conexao: prova que o container Oracle responde e que o usuario da aplicacao conecta.
+WHENEVER SQLERROR EXIT FAILURE
+WHENEVER OSERROR EXIT FAILURE
+SET SERVEROUTPUT ON
+DECLARE
+  v NUMBER;
+BEGIN
+  SELECT 1 INTO v FROM dual;
+  IF v <> 1 THEN RAISE_APPLICATION_ERROR(-20900, 'FALHA: dual'); END IF;
+  DBMS_OUTPUT.PUT_LINE('OK t0_conexao');
+END;
+/
+EXIT

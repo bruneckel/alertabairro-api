@@ -1,0 +1,37 @@
+# AlertaBairro - ambiente local.
+#
+# Ordem: banco -> API -> app. O primeiro boot do Oracle leva alguns minutos
+# (ele cria o banco); os seguintes sao rapidos por causa do volume nomeado.
+#
+#   docker compose up -d oracle
+#   docker compose ps          # aguardar "healthy"
+
+services:
+  oracle:
+    # 23ai Free. Imagem com ARM64 nativo: as imagens oracle-xe:21 sao so amd64
+    # e dependeriam de emulacao no Apple Silicon.
+    image: gvenzl/oracle-free:23-slim
+    container_name: alertabairro-oracle
+    environment:
+      # Senha do SYS/SYSTEM. O usuario da aplicacao e criado pela propria imagem,
+      # e por isso nenhum script nosso precisa de CREATE USER (restricao da spec 6.1).
+      ORACLE_PASSWORD: ${ORACLE_SYS_PASSWORD:-oracle_sys_dev}
+      APP_USER: ${APP_USER:-alertabairro}
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD:-alertabairro_dev}
+      TZ: America/Sao_Paulo
+    ports:
+      - "1521:1521"
+    volumes:
+      - oracle-dados:/opt/oracle/oradata
+      - ./banco:/banco:ro
+      - ./banco/teste:/teste:ro
+    healthcheck:
+      # healthcheck.sh vem na propria imagem gvenzl.
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 10s
+      retries: 60
+      start_period: 300s
+
+volumes:
+  oracle-dados:
