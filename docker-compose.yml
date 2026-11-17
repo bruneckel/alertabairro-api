@@ -39,5 +39,28 @@ services:
       retries: 60
       start_period: 300s
 
+  api:
+    build:
+      # Contexto e a raiz do repositorio: a imagem copia database/migrations
+      # para o Flyway encontrar as migracoes.
+      context: .
+      dockerfile: Dockerfile
+    container_name: alertabairro-api
+    depends_on:
+      oracle:
+        # O primeiro boot do Oracle leva minutos. Sem esperar o healthy, a API
+        # sobe, falha ao conectar e morre.
+        condition: service_healthy
+    environment:
+      ORACLE_URL: jdbc:oracle:thin:@//oracle:1521/FREEPDB1
+      ORACLE_USER: ${APP_USER:-alertabairro}
+      ORACLE_PASSWORD: ${APP_USER_PASSWORD:-alertabairro_dev}
+      # Sem segredo (ou com menos de 32 caracteres) a API se recusa a subir.
+      JWT_SECRET: ${JWT_SECRET:-}
+      TZ: America/Sao_Paulo
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
 volumes:
   oracle-dados:
