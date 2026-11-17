@@ -14,6 +14,10 @@ services:
     # e dependeriam de emulacao no Apple Silicon.
     image: gvenzl/oracle-free:23-slim
     container_name: alertabairro-oracle
+    # O daemon do Docker pode ser reiniciado (atualizacao do Docker Desktop,
+    # resource saver) e derrubar o banco com SIGTERM. Com isto o ambiente
+    # volta sozinho em vez de exigir um up manual no meio do trabalho.
+    restart: unless-stopped
     environment:
       # Senha do SYS/SYSTEM. O usuario da aplicacao e criado pela propria imagem,
       # e por isso nenhum script nosso precisa de CREATE USER (restricao da spec 6.1).

@@ -34,7 +34,7 @@ SQL
 }
 
 if [ "${1:-}" = "--reset" ]; then
-  echo "=== reset_ambiente.sql (apagando objetos) ==="
+  echo "=== reset_environment.sql (apagando objetos) ==="
   executar /database/reset_environment.sql || { echo "FALHOU o reset"; exit 1; }
 fi
 
