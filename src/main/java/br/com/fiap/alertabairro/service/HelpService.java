@@ -8,7 +8,8 @@ import br.com.fiap.alertabairro.web.dto.HelpRequestResponse;
 import br.com.fiap.alertabairro.web.dto.NewHelpRequest;
 import br.com.fiap.alertabairro.web.dto.Pagination;
 import java.util.List;
-import java.util.Optional;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -74,7 +75,35 @@ public class HelpService {
         row.status(), distance, row.userId() == currentUserId);
   }
 
-  Optional<HelpWithLocation> load(long id) {
-    return repository.find(id);
+  /** Only the author closes their own request: it goes to the app's history. */
+  @Transactional
+  public HelpRequestResponse resolve(long id, long currentUserId) {
+    HelpWithLocation found = loadOrFail(id);
+    requireAuthor(found, currentUserId);
+    repository.resolve(id);
+    return toResponse(loadOrFail(id), resolveViewer(currentUserId, null, null), currentUserId);
+  }
+
+  @Transactional
+  public void delete(long id, long currentUserId) {
+    requireAuthor(loadOrFail(id), currentUserId);
+    repository.delete(id);
+  }
+
+  @Transactional
+  @PreAuthorize("hasRole('VOLUNTARIO')")
+  public int closeOlderThan(int days) {
+    return repository.closeOlderThan(days);
+  }
+
+  private HelpWithLocation loadOrFail(long id) {
+    return repository.find(id)
+        .orElseThrow(() -> new NotFoundException("pedido nao encontrado"));
+  }
+
+  private static void requireAuthor(HelpWithLocation row, long currentUserId) {
+    if (row.userId() != currentUserId) {
+      throw new AccessDeniedException("so quem criou pode alterar este item");
+    }
   }
 }

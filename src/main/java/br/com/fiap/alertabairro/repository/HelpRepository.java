@@ -4,9 +4,15 @@ import br.com.fiap.alertabairro.web.dto.NewHelpRequest;
 import br.com.fiap.alertabairro.web.dto.Pagination;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Map;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.SqlOutParameter;
+import org.springframework.jdbc.core.SqlParameter;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -21,9 +27,16 @@ public class HelpRepository {
       "id, id_usuario, modo, categoria, descricao, urgencia, status, latitude, longitude";
 
   private final JdbcClient jdbc;
+  private final SimpleJdbcCall closeOldCall;
 
-  public HelpRepository(JdbcClient jdbc) {
+  public HelpRepository(JdbcClient jdbc, JdbcTemplate template) {
     this.jdbc = jdbc;
+    this.closeOldCall = new SimpleJdbcCall(template)
+        .withProcedureName("prc_encerrar_pedidos_antigos")
+        .withoutProcedureColumnMetaDataAccess()
+        .declareParameters(
+            new SqlParameter("p_dias", Types.NUMERIC),
+            new SqlOutParameter("p_qtd_encerrados", Types.NUMERIC));
   }
 
   /** Waiting items first, then newest. ROWNUM paging, same reason as the incidents. */
@@ -67,6 +80,22 @@ public class HelpRepository {
         .param("lng", longitude)
         .update();
     return id;
+  }
+
+  public int resolve(long id) {
+    return jdbc.sql("UPDATE pedido_ajuda SET status = 'resolvido' WHERE id = :id")
+        .param("id", id)
+        .update();
+  }
+
+  public int delete(long id) {
+    return jdbc.sql("DELETE FROM pedido_ajuda WHERE id = :id").param("id", id).update();
+  }
+
+  /** Batch UPDATE in the database: one round trip instead of one per row. */
+  public int closeOlderThan(int days) {
+    Map<String, Object> out = closeOldCall.execute(Map.of("p_dias", days));
+    return ((Number) out.get("p_qtd_encerrados")).intValue();
   }
 
   static HelpWithLocation map(ResultSet rs, int row) throws SQLException {
