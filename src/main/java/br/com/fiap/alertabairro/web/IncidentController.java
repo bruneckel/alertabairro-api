@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -51,14 +52,23 @@ public class IncidentController {
   }
 
   @PatchMapping("/{id}")
-  @Operation(summary = "Confirma a ocorrencia (\"tambem vejo isso aqui\")")
+  @Operation(summary = "confirmar (qualquer perfil), atender e resolver (so voluntario)")
   public IncidentResponse apply(
       @PathVariable long id,
       @Valid @RequestBody IncidentActionRequest request,
       AuthenticatedUser current) {
     return switch (request.action()) {
       case "confirmar" -> incidents.confirm(id, current);
-      default -> throw new IllegalArgumentException("acao deve ser: confirmar");
+      case "atender" -> incidents.attend(id, current);
+      case "resolver" -> incidents.resolve(id, current);
+      default -> throw new IllegalArgumentException("acao deve ser: confirmar, atender, resolver");
     };
+  }
+
+  @DeleteMapping("/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @Operation(summary = "Exclui a ocorrencia (so o autor)")
+  public void delete(@PathVariable long id, AuthenticatedUser current) {
+    incidents.delete(id, current);
   }
 }

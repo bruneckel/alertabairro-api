@@ -3,12 +3,14 @@ package br.com.fiap.alertabairro.service;
 import br.com.fiap.alertabairro.repository.IncidentRepository;
 import br.com.fiap.alertabairro.repository.IncidentRepository.IncidentWithAuthor;
 import br.com.fiap.alertabairro.security.AuthenticatedUser;
+import org.springframework.security.access.AccessDeniedException;
 import br.com.fiap.alertabairro.web.BusinessErrors.ConflictException;
 import br.com.fiap.alertabairro.web.BusinessErrors.NotFoundException;
 import br.com.fiap.alertabairro.web.dto.IncidentResponse;
 import br.com.fiap.alertabairro.web.dto.NewIncidentRequest;
 import br.com.fiap.alertabairro.web.dto.Pagination;
 import java.util.List;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,6 +59,49 @@ public class IncidentService {
 
     repository.incrementReports(id);
     return toResponse(load(id), current.id());
+  }
+
+  /**
+   * Status only moves forward: aberta -> em_atendimento -> resolvida.
+   *
+   * <p>Reads with FOR UPDATE before deciding, which fixes the inherited defect 5.3(e):
+   * there, two volunteers could both pass the "is it still open?" check and both win.
+   */
+  @Transactional
+  @PreAuthorize("hasRole('VOLUNTARIO')")
+  public IncidentResponse attend(long id, AuthenticatedUser current) {
+    IncidentWithAuthor incident = lockOrFail(id);
+    if (!"aberta".equals(incident.status())) {
+      throw new ConflictException("so ocorrencias abertas podem ser assumidas");
+    }
+    repository.changeStatus(id, "em_atendimento");
+    return toResponse(load(id), current.id());
+  }
+
+  @Transactional
+  @PreAuthorize("hasRole('VOLUNTARIO')")
+  public IncidentResponse resolve(long id, AuthenticatedUser current) {
+    IncidentWithAuthor incident = lockOrFail(id);
+    if ("resolvida".equals(incident.status())) {
+      throw new ConflictException("esta ocorrencia ja foi resolvida");
+    }
+    repository.changeStatus(id, "resolvida");
+    return toResponse(load(id), current.id());
+  }
+
+  /** Only the author, for the case of a mistaken report. */
+  @Transactional
+  public void delete(long id, AuthenticatedUser current) {
+    IncidentWithAuthor incident = load(id);
+    if (incident.userId() != current.id()) {
+      throw new AccessDeniedException("so quem criou pode excluir este item");
+    }
+    repository.delete(id);
+  }
+
+  private IncidentWithAuthor lockOrFail(long id) {
+    return repository.findForUpdate(id)
+        .orElseThrow(() -> new NotFoundException("ocorrencia nao encontrada"));
   }
 
   IncidentWithAuthor load(long id) {
