@@ -347,4 +347,8 @@ em português, porque são contrato fechado com o app; `@JsonProperty` faz a pon
 
 ## Links
 
-Repositório do app e vídeos: [`links.txt`](links.txt)
+- **App mobile:** [luanaestanislau/GlobalSolution26_App](https://github.com/luanaestanislau/GlobalSolution26_App) — branch `feat/integracao-api-real`
+- **Vídeos:** os links do pitch de venda e do pitch técnico vão no `.txt` da entrega, junto do link deste repositório.
+
+O roteiro de gravação, com as contas de demonstração e a receita para mostrar o trigger de
+escalonamento ao vivo, está em [`database/README.md`](database/README.md).
