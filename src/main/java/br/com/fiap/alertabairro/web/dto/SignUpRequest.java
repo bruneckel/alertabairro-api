@@ -28,6 +28,7 @@ public record SignUpRequest(
     String password,
 
     @JsonProperty("perfil")
+    @NotBlank(message = "perfil e obrigatorio")
     @Pattern(regexp = "morador|idoso|voluntario",
              message = "perfil deve ser: morador, idoso, voluntario")
     String role) {

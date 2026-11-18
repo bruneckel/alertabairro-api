@@ -2,10 +2,12 @@ package br.com.fiap.alertabairro.web.dto;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 /** Body of {@code POST /checkins}. The coordinate is optional. */
 public record CheckinRequest(
+    @NotBlank(message = "status e obrigatorio")
     @Pattern(regexp = "estou_bem|preciso_de_ajuda",
              message = "status deve ser: estou_bem, preciso_de_ajuda")
     String status,

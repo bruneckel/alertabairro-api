@@ -29,6 +29,10 @@ spring:
       fetch-size: 200
 
   jackson:
+    deserialization:
+      # Sem isto, Jackson trunca 1.5 para 1 em campo Integer sem reclamar: a API
+      # aplicaria "entrada de 1,5 pessoa" como 1 em vez de recusar.
+      accept-float-as-int: false
     serialization:
       # Datas como texto ISO-8601 com offset, nunca como numero. O app joga
       # criadaEm direto em new Date(): sem offset, o "ha X min" mente.

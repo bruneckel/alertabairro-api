@@ -58,6 +58,7 @@ public class IncidentController {
       @Valid @RequestBody IncidentActionRequest request,
       AuthenticatedUser current) {
     return switch (request.action()) {
+      case null -> throw new IllegalArgumentException("acao e obrigatoria");
       case "confirmar" -> incidents.confirm(id, current);
       case "atender" -> incidents.attend(id, current);
       case "resolver" -> incidents.resolve(id, current);

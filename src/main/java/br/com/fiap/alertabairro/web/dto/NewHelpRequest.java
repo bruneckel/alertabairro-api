@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 /** Body of {@code POST /ajuda}. The coordinate is optional. */
 public record NewHelpRequest(
     @JsonProperty("modo")
+    @NotBlank(message = "modo e obrigatorio")
     @Pattern(regexp = "pedido|oferta", message = "modo deve ser: pedido, oferta")
     String mode,
 
@@ -24,6 +25,7 @@ public record NewHelpRequest(
     String description,
 
     @JsonProperty("urgencia")
+    @NotBlank(message = "urgencia e obrigatoria")
     @Pattern(regexp = "baixa|media|alta", message = "urgencia deve ser: baixa, media, alta")
     String urgency,
 
