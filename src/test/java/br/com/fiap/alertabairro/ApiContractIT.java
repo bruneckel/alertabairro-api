@@ -26,7 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Contrato: corpo de erro e OpenAPI")
-class ApiContractIT {
+class ApiContractIT extends OracleSupport {
 
   private static final String SEGREDO = "segredo-de-teste-com-mais-de-trinta-e-dois-caracteres";
 

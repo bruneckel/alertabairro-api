@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Ocorrencias: confirmacao")
-class IncidentConfirmIT {
+class IncidentConfirmIT extends OracleSupport {
 
   @Autowired private MockMvc mvc;
   @Autowired private JdbcClient jdbc;

@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Ajuda: resolver, excluir e encerrar antigos")
-class HelpFlowIT {
+class HelpFlowIT extends OracleSupport {
 
   @Autowired private MockMvc mvc;
   @Autowired private JdbcClient jdbc;

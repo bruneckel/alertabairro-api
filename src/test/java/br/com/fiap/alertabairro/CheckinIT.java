@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Check-ins")
-class CheckinIT {
+class CheckinIT extends OracleSupport {
 
   @Autowired private MockMvc mvc;
 

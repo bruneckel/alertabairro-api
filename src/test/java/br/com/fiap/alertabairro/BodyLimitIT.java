@@ -20,7 +20,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DisplayName("Limite de corpo da requisicao")
-class BodyLimitIT {
+class BodyLimitIT extends OracleSupport {
 
   @LocalServerPort private int porta;
 

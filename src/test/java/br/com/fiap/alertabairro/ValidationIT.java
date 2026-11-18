@@ -33,7 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Validacao de entrada")
-class ValidationIT {
+class ValidationIT extends OracleSupport {
 
   /** Mensagem que o tratador usa para ORA-01400: se ela aparecer, o banco e que recusou. */
   private static final String RECUSA_DO_BANCO = "campo obrigatorio nao informado";

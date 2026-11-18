@@ -319,15 +319,24 @@ Testes
 ------
 
 
-    ./mvnw test                      # unitários, SEM Docker
-    ./mvnw verify                    # tudo, precisa do banco de pé
-    ./database/tests/run_tests.sh    # as rotinas PL/SQL, direto no Oracle
+    ./mvnw test                      # unitários, sem Docker e sem banco
+    ./mvnw verify                    # tudo; sobe um Oracle próprio via Testcontainers
+    ./database/tests/run_tests.sh    # as rotinas PL/SQL, direto no Oracle do compose
 
 
-76 testes Java (5 unitários + 71 de integração) e 7 scripts de banco, todos passando.
+94 testes Java (5 unitários + 89 de integração) e 7 scripts de banco, todos passando.
 
 A separação importa: classe terminada em Test é unitária e roda sem Docker; terminada em
-IT precisa de banco. Quem não tem Docker ainda roda parte da suíte.
+IT sobe o próprio banco. Quem não tem Docker ainda roda parte da suíte.
+
+Os testes de integração não tocam o banco da demonstração. OracleSupport cria um
+Oracle descartável por Testcontainers, e o Flyway aplica as migrações lá dentro -- então as
+rotinas PL/SQL são exercitadas de verdade, mas num banco que não é o seu. Isso foi
+consertado depois de uma revisão encontrar 848 usuários e 255 ocorrências de teste no banco
+local, o suficiente para dominar /indicadores, que é uma das funcionalidades avaliadas.
+
+Com testcontainers.reuse.enable=true em ~/.testcontainers.properties, o container
+sobrevive entre execuções e a suíte roda em segundos.
 
 Os testes de banco rodam contra o Oracle de verdade, não contra um mock -- foi assim que
 se descobriu que VARCHAR2(500) recusava uma descrição normal em português, porque conta

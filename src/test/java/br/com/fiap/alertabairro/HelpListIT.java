@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Ajuda: lista e criacao")
-class HelpListIT {
+class HelpListIT extends OracleSupport {
 
   @Autowired private MockMvc mvc;
 

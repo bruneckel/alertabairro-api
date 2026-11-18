@@ -24,7 +24,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Ocorrencias: listagem e registro")
-class IncidentListIT {
+class IncidentListIT extends OracleSupport {
 
   @Autowired private MockMvc mvc;
 

@@ -36,7 +36,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Ajuda: privacidade de quem pede")
-class HelpPrivacyIT {
+class HelpPrivacyIT extends OracleSupport {
 
   private static final double LAT_A = -23.561000;
   private static final double LNG_A = -46.611000;

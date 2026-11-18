@@ -23,7 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Indicadores")
-class IndicatorIT {
+class IndicatorIT extends OracleSupport {
 
   private static final List<String> CHAVES = List.of(
       "ocorrenciasAbertas", "ocorrenciasEmAtendimento", "ocorrenciasResolvidas",

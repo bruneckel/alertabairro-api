@@ -19,7 +19,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
  */
 @SpringBootTest
 @DisplayName("Schema: migracoes aplicadas e objetos PL/SQL validos")
-class SchemaIT {
+class SchemaIT extends OracleSupport {
 
   @Autowired private JdbcClient jdbc;
 

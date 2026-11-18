@@ -31,7 +31,7 @@ import org.springframework.test.web.servlet.ResultActions;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Ocorrencias: atender, resolver e excluir")
-class IncidentFlowIT {
+class IncidentFlowIT extends OracleSupport {
 
   @Autowired private MockMvc mvc;
   @Autowired private JdbcClient jdbc;

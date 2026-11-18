@@ -39,7 +39,7 @@ import org.springframework.test.web.servlet.MvcResult;
 @TestPropertySource(properties =
     "alertabairro.jwt.segredo=segredo-de-teste-com-mais-de-trinta-e-dois-caracteres")
 @DisplayName("Auth: cadastro, login e validacao de token")
-class AuthControllerIT {
+class AuthControllerIT extends OracleSupport {
 
   private static final String SEGREDO =
       "segredo-de-teste-com-mais-de-trinta-e-dois-caracteres";

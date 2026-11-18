@@ -28,7 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @DisplayName("Abrigos: lista, mais proximo e vagas")
-class ShelterIT {
+class ShelterIT extends OracleSupport {
 
   @Autowired private MockMvc mvc;
   @Autowired private JdbcClient jdbc;
