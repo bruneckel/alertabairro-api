@@ -101,15 +101,27 @@ public class SecurityConfig {
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
             .requestMatchers(PUBLIC_PATHS).permitAll()
             .anyRequest().authenticated())
-        .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(converter)))
+        // The entry point must be wired on oauth2ResourceServer too, not only on
+        // exceptionHandling: exceptionHandling fires only when NO token was presented,
+        // while a REJECTED bearer token is handled earlier by the resource server's own
+        // entry point -- which answers 401 with no body and leaks the decode reason in
+        // WWW-Authenticate. Token expiry is the most common 401 in real use, and the app
+        // reads error.response.data.erro through a single path.
+        .oauth2ResourceServer(oauth -> oauth
+            .authenticationEntryPoint(SecurityConfig::unauthorized)
+            .jwt(jwt -> jwt.jwtAuthenticationConverter(converter)))
         .exceptionHandling(ex -> ex
-            .authenticationEntryPoint((req, res, e) ->
-                write(res, HttpServletResponse.SC_UNAUTHORIZED,
-                    "token ausente, invalido ou expirado"))
+            .authenticationEntryPoint(SecurityConfig::unauthorized)
             .accessDeniedHandler((req, res, e) ->
                 write(res, HttpServletResponse.SC_FORBIDDEN,
                     "acao nao permitida para o seu perfil")))
         .build();
+  }
+
+  private static void unauthorized(
+      jakarta.servlet.http.HttpServletRequest req, HttpServletResponse res,
+      org.springframework.security.core.AuthenticationException e) throws IOException {
+    write(res, HttpServletResponse.SC_UNAUTHORIZED, "token ausente, invalido ou expirado");
   }
 
   private static void write(HttpServletResponse res, int status, String message)
