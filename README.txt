@@ -387,9 +387,8 @@ Estrutura
     │   └── repository/    acesso a dados e chamada das rotinas
     ├── database/          migrações, seed, reset, testes  → database/README.md
     └── docs/
-        ├── modelo-dados.md             DER · MER · dicionário de dados
-        ├── decisoes-de-implementacao.md  o porquê de cada escolha, e o que ficou de fora
-        └── superpowers/                design e plano de implementação
+        ├── modelo-dados.md   DER · MER · dicionário de dados
+        └── superpowers/      design e plano de implementação
 
 
 Os nomes de código são em inglês, por convenção de mercado. Os nomes de domínio --
