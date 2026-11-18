@@ -1,5 +1,6 @@
 package br.com.fiap.alertabairro.web;
 
+import br.com.fiap.alertabairro.config.RequestTooLargeException;
 import br.com.fiap.alertabairro.web.BusinessErrors.ConflictException;
 import br.com.fiap.alertabairro.web.BusinessErrors.InvalidCredentialsException;
 import br.com.fiap.alertabairro.web.BusinessErrors.NotFoundException;
@@ -69,7 +70,17 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(HttpMessageNotReadableException.class)
   ResponseEntity<Map<String, String>> unreadableBody(HttpMessageNotReadableException e) {
+    // The size limit surfaces here when the body is chunked, because the overflow is only
+    // detected while Jackson reads the stream.
+    if (findCause(e, RequestTooLargeException.class) != null) {
+      return body(HttpStatus.PAYLOAD_TOO_LARGE, "corpo da requisicao muito grande");
+    }
     return body(HttpStatus.BAD_REQUEST, "corpo da requisicao invalido");
+  }
+
+  @ExceptionHandler(RequestTooLargeException.class)
+  ResponseEntity<Map<String, String>> tooLarge(RequestTooLargeException e) {
+    return body(HttpStatus.PAYLOAD_TOO_LARGE, "corpo da requisicao muito grande");
   }
 
   /** An unknown path is a 404, not the catch-all 500. */
@@ -133,9 +144,13 @@ public class GlobalExceptionHandler {
   }
 
   private static SQLException findSqlException(Throwable e) {
+    return findCause(e, SQLException.class);
+  }
+
+  private static <T extends Throwable> T findCause(Throwable e, Class<T> tipo) {
     for (Throwable current = e; current != null; current = current.getCause()) {
-      if (current instanceof SQLException sql) {
-        return sql;
+      if (tipo.isInstance(current)) {
+        return tipo.cast(current);
       }
     }
     return null;
