@@ -114,6 +114,8 @@ class HelpListIT {
     JsonNode lista = read(mvc.perform(get("/ajuda?limite=200").header("Authorization", bearer(quem)))
         .andExpect(status().isOk()).andReturn().getResponse().getContentAsString());
 
+    assertThat(lista).as("sem itens, a ordenacao nao e exercitada").isNotEmpty();
+
     boolean viAtendidoOuResolvido = false;
     for (JsonNode p : lista) {
       String status = p.path("status").asText();

@@ -249,8 +249,9 @@ class AuthControllerIT {
     String jwt = corpo.replaceAll(".*\"token\"\\s*:\\s*\"([^\"]+)\".*", "$1");
     assertThat(jwt).as("token extraido do corpo").isNotBlank().doesNotContain("{");
 
+    // is(not(401)) aceitaria um 500: a asercao precisa dizer que a rota FUNCIONOU.
     mvc.perform(get("/ocorrencias").header("Authorization", "Bearer " + jwt))
-        .andExpect(status().is(not(401)));
+        .andExpect(status().isOk());
   }
 
   @Test
