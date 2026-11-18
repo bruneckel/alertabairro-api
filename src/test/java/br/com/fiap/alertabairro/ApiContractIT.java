@@ -32,6 +32,19 @@ class ApiContractIT extends OracleSupport {
 
   @Autowired private MockMvc mvc;
 
+  /**
+   * Adultera a assinatura trocando o ultimo caractere por um DIFERENTE.
+   *
+   * <p>Trocar por um caractere fixo nao serve: quando o original ja e aquele caractere, o
+   * token segue valido e o teste falha de forma intermitente -- o alfabeto base64url tem
+   * 64 simbolos, entao isso acontecia em cerca de uma execucao a cada 64.
+   */
+  private static String adulterar(String jwt) {
+    char ultimo = jwt.charAt(jwt.length() - 1);
+    char diferente = ultimo == 'A' ? 'B' : 'A';
+    return jwt.substring(0, jwt.length() - 1) + diferente;
+  }
+
   private static String token(Instant expiraEm) throws Exception {
     SignedJWT jwt = new SignedJWT(
         new JWSHeader(JWSAlgorithm.HS256),
@@ -50,7 +63,7 @@ class ApiContractIT extends OracleSupport {
     String[] ruins = {
         token(Instant.now().minusSeconds(120)),   // expirado
         "lixo.que.nao.e.jwt",
-        token(Instant.now().plusSeconds(600)).replaceAll(".$", "X")};  // assinatura adulterada
+        adulterar(token(Instant.now().plusSeconds(600)))};  // assinatura adulterada
 
     for (String t : ruins) {
       mvc.perform(get("/ocorrencias").header("Authorization", "Bearer " + t))
@@ -70,7 +83,7 @@ class ApiContractIT extends OracleSupport {
   @Test
   @DisplayName("o motivo da recusa do token nao vaza em WWW-Authenticate")
   void motivoNaoVaza() throws Exception {
-    String adulterado = token(Instant.now().plusSeconds(600)).replaceAll(".$", "X");
+    String adulterado = adulterar(token(Instant.now().plusSeconds(600)));
     String cabecalho = mvc.perform(get("/ocorrencias")
             .header("Authorization", "Bearer " + adulterado))
         .andExpect(status().isUnauthorized())
