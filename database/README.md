@@ -91,7 +91,7 @@ docker compose exec -T oracle sqlplus -S \
   alertabairro/alertabairro_dev@//localhost:1521/FREEPDB1 @/database/seed_demo.sql
 ```
 
-Três contas, senha única `alertabairro123`:
+Três contas, senha única `alertabairro123`. São três, e não duas, por um motivo:
 
 | E-mail | Perfil | Papel na demonstração |
 |---|---|---|
@@ -99,11 +99,11 @@ Três contas, senha única `alertabairro123`:
 | `joao@alertabairro.demo` | idoso | já confirmou essa ocorrência |
 | `ana@alertabairro.demo` | voluntario | pode atender, resolver e mexer em vagas |
 
-### Receita para mostrar o trigger funcionando
+### Como ver o trigger de escalonamento funcionar
 
-A ocorrência "Rua alagada" já está com **2 relatos** e prioridade **alta**.
-Entre com a conta da **Ana** e toque em "Também vejo isso aqui": o terceiro
-relato dispara `trg_ocorrencia_escalona` e a prioridade vira **critica** na tela.
+A ocorrência "Rua alagada" nasce com **2 relatos** e prioridade **alta**. Entre com a
+conta da **Ana** e toque em "Também vejo isso aqui": o terceiro relato dispara
+`trg_ocorrencia_escalona` e a prioridade vira **critica**.
 
 Precisa ser a Ana porque ninguém confirma a própria ocorrência (Maria) e ninguém
 confirma duas vezes (João já confirmou). É por isso que o seed traz três contas:

@@ -172,7 +172,7 @@ O Flyway aplica as seis migrações de database/migrations/ na subida da API.
     open http://localhost:8080/swagger-ui.html
 
 
-Dados de demonstração (opcional, recomendado antes de gravar vídeo):
+Dados de demonstração (opcional):
 
     docker compose exec -T oracle sqlplus -S \
       alertabairro/alertabairro_dev@//localhost:1521/FREEPDB1 @/database/seed_demo.sql
@@ -308,7 +308,7 @@ Tecnologias, e por que cada uma
   Spring Security + Resource Server         jjwt na mão                   Assinatura, expiração e algoritmo fixo HS256 validados pela biblioteca, não por código nosso
   Flyway                                    script solto                  O projeto anterior tinha um ajustes_api_v2.sql com <nome_da_constraint> para editar à mão -- exatamente o que migração versionada resolve
   Oracle 23ai Free (gvenzl/oracle-free)     oracle-xe:21                  PL/SQL é requisito do enunciado, e esta é a única imagem com ARM64 nativo
-  springdoc-openapi                         nenhuma                       É o que torna demonstráveis, no vídeo, as sete rotas que o app não usa
+  springdoc-openapi                         nenhuma                       Torna as sete rotas que o app não consome exploráveis sem um cliente HTTP à parte
   Bean Validation                           validação manual              A regra fica junto do campo, declarativa
 
 
@@ -329,11 +329,11 @@ Testes
 A separação importa: classe terminada em Test é unitária e roda sem Docker; terminada em
 IT sobe o próprio banco. Quem não tem Docker ainda roda parte da suíte.
 
-Os testes de integração não tocam o banco da demonstração. OracleSupport cria um
-Oracle descartável por Testcontainers, e o Flyway aplica as migrações lá dentro -- então as
-rotinas PL/SQL são exercitadas de verdade, mas num banco que não é o seu. Isso foi
-consertado depois de uma revisão encontrar 848 usuários e 255 ocorrências de teste no banco
-local, o suficiente para dominar /indicadores, que é uma das funcionalidades avaliadas.
+Os testes de integração não tocam o banco de desenvolvimento. OracleSupport cria um
+Oracle descartável por Testcontainers e o Flyway aplica as migrações lá dentro: as rotinas
+PL/SQL são exercitadas de verdade, num banco que a suíte pode sujar à vontade. Sem esse
+isolamento, os usuários e ocorrências criados pelos testes passariam a dominar
+/indicadores e a listagem do mapa.
 
 Com testcontainers.reuse.enable=true em ~/.testcontainers.properties, o container
 sobrevive entre execuções e a suíte roda em segundos.
@@ -394,14 +394,4 @@ Estrutura
 Os nomes de código são em inglês, por convenção de mercado. Os nomes de domínio --
 tabelas (ocorrencia), rotas (/ocorrencias) e campos JSON (tipo, criadaEm) -- seguem
 em português, porque são contrato fechado com o app; @JsonProperty faz a ponte.
-
-Links
------
-
-
-  - App mobile: luanaestanislau/GlobalSolution26_App <https://github.com/luanaestanislau/GlobalSolution26_App> -- branch feat/integracao-api-real
-  - Vídeos: os links do pitch de venda e do pitch técnico vão no .txt da entrega, junto do link deste repositório.
-
-O roteiro de gravação, com as contas de demonstração e a receita para mostrar o trigger de
-escalonamento ao vivo, está em database/README.md <database/README.md>.
 
