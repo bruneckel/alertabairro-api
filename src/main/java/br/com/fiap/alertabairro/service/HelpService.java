@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class HelpService {
 
   /** Shown when neither the query nor a check-in gives us anywhere to measure from. */
-  static final String UNKNOWN_DISTANCE = "distancia desconhecida";
+  static final String UNKNOWN_DISTANCE = "distância desconhecida";
 
   private final HelpRepository repository;
   private final CheckinRepository checkins;
@@ -37,9 +37,11 @@ public class HelpService {
   }
 
   @Transactional
-  public HelpRequestResponse create(
-      long userId, NewHelpRequest request, Double latitude, Double longitude) {
-    Coordinate position = resolveViewer(userId, request.latitude(), request.longitude());
+  public HelpRequestResponse create(long userId, NewHelpRequest request) {
+    // Stored already coarse: the exact coordinate never reaches the database, so it
+    // cannot be recovered later even by someone reading the table directly.
+    Coordinate position =
+        CoarseLocation.snap(resolveViewer(userId, request.latitude(), request.longitude()));
     Double lat = position == null ? null : position.latitude();
     Double lng = position == null ? null : position.longitude();
 
@@ -51,10 +53,8 @@ public class HelpService {
 
   /** The coordinate from the query, else the user's last check-in, else nothing. */
   private Coordinate resolveViewer(long userId, Double latitude, Double longitude) {
-    if (latitude != null && longitude != null) {
-      return new Coordinate(latitude, longitude);
-    }
-    return checkins.lastPosition(userId).orElse(null);
+    Coordinate given = Coordinate.ofNullable(latitude, longitude);
+    return given != null ? given : checkins.lastPosition(userId).orElse(null);
   }
 
   /**
@@ -66,8 +66,12 @@ public class HelpService {
 
     String distance = UNKNOWN_DISTANCE;
     if (viewer != null && row.latitude() != null && row.longitude() != null) {
-      distance = Distance.format(Distance.km(
-          viewer.latitude(), viewer.longitude(), row.latitude(), row.longitude()));
+      // Both endpoints on the same grid: moving the probe inside a cell cannot change
+      // the answer, so repeated probes add no information to trilaterate with.
+      Coordinate from = CoarseLocation.snap(viewer);
+      Coordinate to = CoarseLocation.snap(new Coordinate(row.latitude(), row.longitude()));
+      distance = Distance.format(
+          Distance.km(from.latitude(), from.longitude(), to.latitude(), to.longitude()));
     }
 
     return new HelpRequestResponse(

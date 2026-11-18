@@ -1,5 +1,6 @@
 package br.com.fiap.alertabairro.web;
 
+import br.com.fiap.alertabairro.service.Coordinate;
 import br.com.fiap.alertabairro.service.ShelterService;
 import br.com.fiap.alertabairro.web.dto.ShelterResponse;
 import br.com.fiap.alertabairro.web.dto.VacancyRequest;
@@ -36,7 +37,7 @@ public class ShelterController {
   @GetMapping("/proximo")
   @Operation(summary = "Abrigo com vaga mais proximo (fn_abrigo_mais_proximo)")
   public ShelterResponse nearest(@RequestParam double lat, @RequestParam double lng) {
-    checkCoordinate(lat, lng);
+    Coordinate.requireValid(lat, lng);
     return shelters.nearest(lat, lng);
   }
 
@@ -50,13 +51,4 @@ public class ShelterController {
     return shelters.changeOccupancy(id, request.amount());
   }
 
-  /** Throws IllegalArgumentException, which the handler turns into 400 rather than 500. */
-  private static void checkCoordinate(double latitude, double longitude) {
-    if (!Double.isFinite(latitude) || latitude < -90 || latitude > 90) {
-      throw new IllegalArgumentException("latitude deve estar entre -90 e 90");
-    }
-    if (!Double.isFinite(longitude) || longitude < -180 || longitude > 180) {
-      throw new IllegalArgumentException("longitude deve estar entre -180 e 180");
-    }
-  }
 }

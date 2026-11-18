@@ -1,6 +1,7 @@
 package br.com.fiap.alertabairro.web;
 
 import br.com.fiap.alertabairro.security.AuthenticatedUser;
+import br.com.fiap.alertabairro.service.Coordinate;
 import br.com.fiap.alertabairro.service.HelpService;
 import br.com.fiap.alertabairro.web.dto.ClosedCountResponse;
 import br.com.fiap.alertabairro.web.dto.CloseOldRequest;
@@ -44,6 +45,10 @@ public class HelpController {
       @RequestParam(required = false) Double lat,
       @RequestParam(required = false) Double lng,
       AuthenticatedUser current) {
+    if (lat != null || lng != null) {
+      Coordinate.requireValid(
+          lat == null ? Double.NaN : lat, lng == null ? Double.NaN : lng);
+    }
     return help.list(Pagination.of(limite, deslocamento), current.id(), lat, lng);
   }
 
@@ -52,7 +57,7 @@ public class HelpController {
   @Operation(summary = "Cria um pedido ou uma oferta de ajuda")
   public HelpRequestResponse create(
       @Valid @RequestBody NewHelpRequest request, AuthenticatedUser current) {
-    return help.create(current.id(), request, request.latitude(), request.longitude());
+    return help.create(current.id(), request);
   }
 
   @PatchMapping("/{id}")
